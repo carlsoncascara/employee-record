@@ -1,0 +1,42 @@
+version: "3"
+services:
+    employee-db:
+        image: mysql
+        restart: always
+        env_file: ./.env
+        hostname: 0.0.0.0
+        ports:
+            - $MYSQL_LOCAL_PORT:$MYSQL_DOCKER_PORT
+        environment:
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+            MYSQL_DATABASE: $MYSQL_DABASE
+        volumes:
+            - mysqldb:/database
+    docker-express:
+        build:
+            context: ./nodejs
+            args:
+                NODE_ENV: development
+        env_file: ./.env
+        volumes:
+            - ./nodejs/helpers:/node/helpers:ro
+            - ./nodejs/models:/node/models:ro
+            - ./nodejs/routes:/node/routes:ro
+            - ./nodejs/serives:/node/services:ro
+        environment:
+            - NODE_ENV=developement
+        ports:
+            - $EXPRESS_LOCAL_PORT:$EXPRESS_DOCKER_PORT
+        command: npm run dev
+    angular-app:
+        build: ./angular-activity
+        env_file: ./.env
+        ports:
+            - $LOCAL_PORT:$DOCKER_PORT
+        volumes:
+            - ./angular-activity/src:/app/src:ro
+        environment:
+            - NODE_ENV=development
+        command: npm run start
+volumes:
+    mysqldb:
